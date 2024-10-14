@@ -1,50 +1,53 @@
 `timescale 1ns / 1ps
 module sys_top(
-    input                 sys_clk     	,  //缁?鑽ょ埠閺冨爼鎸?
-    input                 sys_rst_n   	,  //缁?鑽ょ埠婢跺秳缍呴敍灞肩秵閻㈤潧閽╅張澶嬫櫏
-    // input                 key   		,  //閹稿?愭暛key0    
+    input                 sys_clk     	,  //时钟信号
+    input                 sys_rst_n   	,  //复位信号
+    // input                 key   		,  //按键信号
 
-    //AD閼侯垳澧栭幒銉ュ經
-    input     [13:0]       ad_data    	,  //AD鏉堟挸鍙嗛弫鐗堝祦
-    //濡?鈩冨珯鏉堟挸鍙嗛悽闈涘竾鐡掑懎鍤?闁插繒鈻奸弽鍥х箶(閺堫剚顐肩拠鏇㈢崣閺堫亞鏁ら敓锟??)
-    input                 ad_porta_otr      	,  //0:閸︺劑鍣虹粙瀣?瀵栭敓锟?? 1:鐡掑懎鍤?闁插繒鈻?
-    output                ada_porta_clk      	,  //AD妞瑰崬濮╅弮鍫曟寭,閿燂拷?婢堆勬暜閿燂拷?32Mhz閺冨爼鎸? 
+    //AD转换模块的接口
+    input     [13:0]       ad_porta_data    	,  //AD转换模块的数据
+    input     [13:0]       ad_portb_data    	,  //AD转换模块的数据
+   
+    input                 ad_ofa      	,  //AD转换模块的使能信号
+    output                ad_shdna      	,
+    output                ad_porta_clk      	,  //AD转换模块的时钟
 
-        //濡?鈩冨珯鏉堟挸鍙嗛悽闈涘竾鐡掑懎鍤?闁插繒鈻奸弽鍥х箶(閺堫剚顐肩拠鏇㈢崣閺堫亞鏁ら敓锟??)
-    input                 ad_portb_otr      	,  //0:閸︺劑鍣虹粙瀣?瀵栭敓锟?? 1:鐡掑懎鍤?闁插繒鈻?
-    output                ada_portb_clk      	  //AD妞瑰崬濮╅弮鍫曟寭,閿燂拷?婢堆勬暜閿燂拷?32Mhz閺冨爼鎸? 
-    
+    //AD转换模块的接口
+    input                 ad_ofb      	,  //AD转换模块的使能信号
+    output                ad_shdnb      	,
+    output                ad_portb_clk      	  //AD转换模块的时钟
 
     );
 
-    //NET define    
-    wire        clk_65m;            //100m閺冨爼鎸?
-    wire        clkA_65m;             //50m閺冨爼鎸?
-    wire        clkB_65m;             //25m閺冨爼鎸? 
-    //wire        clkB_65m_deg;         //閻╅晲缍呴崑蹇曅╅崥搴ｆ畱25m閺冨爼鎸? 
-    wire        locked;              //pll鏉堟挸鍤?缁嬪啿鐣炬穱鈥冲娇
-    wire        rst_n;               //婢跺秳缍呮穱鈥冲娇閿涘奔缍嗛悽闈涢挬閺堝?嬫櫏
-    //瀵板懏妞傞柦鐔兼敚鐎规艾鎮楁禍褏鏁撶紒鎾存将婢跺秳缍呮穱鈥冲娇
-    assign rst_n =  sys_rst_n && locked; 
-    //鐏忓敀ll娴溠呮晸閿燂拷?25m閺冨爼鎸撶挧瀣?绮癮d閻ㄥ嫰鈹嶉崝銊︽?傞敓锟??
-    assign ad_clk =  clkB_65m; 
+    //信号定义
+    wire        clk_65m;            //100MHz时钟
+    wire        clkA_65m;             //50MHz时钟
+    wire        clkB_65m;             //25MHz时钟
+    wire        locked;              //PLL锁定信号
+    wire        rst_n;               //系统复位信号
 
-    //娓氬??瀵瞤ll濡?鈥虫健	
-      clk_wiz_0 u_pll
-  (
-  // Clock out ports  
-  .clk_out1(clk_65m),
-  .clk_out2(clkA_65m),
-  .clk_out3(clkB_65m),
-  // Status and control signals               
-  .resetn(sys_rst_n), 
-  .locked(locked),
- // Clock in ports
-  .clk_in1(sys_clk)
-  );
+    assign rst_n =  sys_rst_n && locked; 
+    assign ad_shdna = 1'b1;
+    assign ad_shdnb = 1'b1;
+    // assign ad_clk =  clkB_65m; 
+
+    //PLL模块
+    clk_wiz_0 u_pll
+    (
+    //时钟输出
+    .clk_out1(clk_65m),
+    .clk_out2(clkA_65m),
+    .clk_out3(clkB_65m),
+    //状态和控制信号               
+    .resetn(sys_rst_n), 
+    .locked(locked),
+    //时钟输入
+    .clk_in1(sys_clk)
+    );
   
-  BUFG bufa (.I(clk_65m),.O(ada_porta_clk));
-  BUFG bufb (.I(clkA_65m),.O(ada_portb_clk));
+    //时钟信号缓冲
+    BUFG bufa (.I(clkA_65m),.O(ad_porta_clk));
+    BUFG bufb (.I(clkB_65m),.O(ad_portb_clk));
 
 
 endmodule
