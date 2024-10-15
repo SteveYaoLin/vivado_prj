@@ -34,6 +34,7 @@ module sys_top_tb;
   reg clk_50m;
   reg clk_65mA;
   reg clk_65mB;
+  reg once;
   
   initial begin
     sys_clk = 0;
@@ -45,6 +46,7 @@ module sys_top_tb;
     ad_portb_data = 0;
     ad_ofa = 0;
     ad_ofb = 0;
+    once = 0;
     
     #100;
     sys_rst_n = 1;  // De-assert reset after 100ns
@@ -76,7 +78,14 @@ module sys_top_tb;
       sine_wave_real = 14'h2000 + amplitude * $sin(2 * 3.14159 * i / 13);  // 正弦波生成公式
       sine_wave = sine_wave_real;  // 将实数转换为14位信号
       ad_porta_data = sine_wave;  // 将正弦波信号传递给ad_porta_data
-      $display("Sine wave value at time %0t: %0d", $time, sine_wave);
+        if (i == 129) begin
+            i=0;
+            once = 1;
+        end
+    if (!once) begin
+        $display("Sine wave value at time %0t: %0d", $time, sine_wave);
+    end
+      
     end
   end
 
