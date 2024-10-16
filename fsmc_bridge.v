@@ -79,7 +79,7 @@ always@(posedge wrn or negedge rst_n)
 		
 	end
 assign BUS_ADDR = address_reg;
-assign BUS_DATA_WR = wrn ? fsmc_db : 16'dzzzz;
-assign fsmc_db = rdn ?  BUS_DATA_RD : 16'dzzzz;
+assign BUS_DATA_WR = wrn ? fsmc_db : 16'hzzzz;
+assign fsmc_db = rdn ?  BUS_DATA_RD : 16'hzzzz;
 /****************************************************************/
 endmodule

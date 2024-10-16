@@ -9,12 +9,23 @@ module sys_top_tb;
   reg [13:0] ad_portb_data;
   reg ad_ofa;
   reg ad_ofb;
+  reg fmc_clk;
+  reg fmc_nl;
+
+  // Inouts
+  wire [15:0] fmc_adda_data;
 
   // Outputs
   wire ad_shdna;
   wire ad_shdnb;
   wire ad_porta_clk;
   wire ad_portb_clk;
+  wire fmc_nwait;
+  wire fmc_nwe;
+  wire fmc_ncs;
+  wire fmc_noe;
+  wire fmc_int;
+  wire mcu_int;
 
   // Instantiate the sys_top module
   sys_top uut (
@@ -27,7 +38,16 @@ module sys_top_tb;
     .ad_shdna(ad_shdna),
     .ad_shdnb(ad_shdnb),
     .ad_porta_clk(ad_porta_clk),
-    .ad_portb_clk(ad_portb_clk)
+    .ad_portb_clk(ad_portb_clk),
+    .fmc_adda_data(fmc_adda_data),
+    .fmc_clk(fmc_clk),
+    .fmc_nl(fmc_nl),
+    .fmc_nwait(fmc_nwait),
+    .fmc_nwe(fmc_nwe),
+    .fmc_ncs(fmc_ncs),
+    .fmc_noe(fmc_noe),
+    .fmc_int(fmc_int),
+    .mcu_int(mcu_int)
   );
 
   // Clock generation
@@ -46,6 +66,9 @@ module sys_top_tb;
     ad_portb_data = 0;
     ad_ofa = 0;
     ad_ofb = 0;
+    // fmc_adda_data = 0;
+    fmc_clk = 0;
+    fmc_nl = 1;
     once = 0;
     
     #100;
@@ -58,6 +81,9 @@ module sys_top_tb;
   // Generate 65M clocks for ADC
   always #7.692 clk_65mA = ~clk_65mA;  // 65M clock A -> period = 15.38ns (T/2 = 7.692ns)
   always #7.692 clk_65mB = ~clk_65mB;  // 65M clock B -> period = 15.38ns (T/2 = 7.692ns)
+
+  // Generate FMC clock (Assume it's 65M for this example)
+  // always #7.692 fmc_clk = ~fmc_clk;  // 65M FMC clock
 
   // Stimulus for ADC data
   always begin
@@ -82,11 +108,19 @@ module sys_top_tb;
             i=0;
             once = 1;
         end
-    if (!once) begin
+      if (!once) begin
         $display("Sine wave value at time %0t: %0d", $time, sine_wave);
-    end
-      
+      end
     end
   end
+
+  // Stimulus for FMC ADDR/DATA bus
+  // always @(posedge fmc_clk) begin
+  //   if (~fmc_nl) begin
+  //     fmc_adda_data = 16'hAAAA;  // Example data driving
+  //   end else begin
+  //     fmc_adda_data = 16'hZZZZ;  // High impedance (for inout)
+  //   end
+  // end
 
 endmodule
