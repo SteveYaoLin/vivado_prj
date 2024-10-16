@@ -5,9 +5,9 @@ module sys_top(
     // input                 key   		,  //按键信号
     //STM32H7的FMC接口
     inout     [15:0]       fmc_adda_data     ,  //FMC的ADDA数据
-    input     fmc_clk     ,  //FMC的ADDA时钟
+    input     fmc_clk      ,  //FMC的ADDA时钟
     input     fmc_nl        ,  //低电平有效的FMC总线忙闲信号
-    output    fmc_nwait     ,  //低电平有效的FMC总线等待信号
+    output     fmc_nwait     ,  //低电平有效的FMC总线等待信号
     output    fmc_nwe       ,  //低电平有效的FMC总线写使能信号
     output    fmc_ncs       ,  //低电平有效的FMC总线片选信号
     output    fmc_noe       ,  //低电平有效的FMC总线读使能信号
@@ -29,7 +29,7 @@ module sys_top(
     );
 
     //信号定义
-    wire        clk_65m;            //100MHz时钟
+    wire        clk_100m;            //100MHz时钟
     wire        clkA_65m;             //50MHz时钟
     wire        clkB_65m;             //25MHz时钟
     wire        locked;              //PLL锁定信号
@@ -48,7 +48,7 @@ module sys_top(
     clk_wiz_0 u_pll
     (
     //时钟输出
-    .clk_out1(clk_65m),
+    .clk_out1(clk_100m),
     .clk_out2(clkA_65m),
     .clk_out3(clkB_65m),
     //状态和控制信号               
@@ -60,7 +60,7 @@ module sys_top(
   
     //instance bus bridge
 fsmc_bridge u_fsmc_bridge(
-	.sys_clk(sys_clk),
+	.sys_clk(clk_100m),
 	.rst_n(rst_n),
 	
 	//fsmc总线相关信号
@@ -82,6 +82,6 @@ fsmc_bridge u_fsmc_bridge(
     BUFG bufb (.I(clkB_65m),.O(ad_portb_clk));
 
 // compile
-assign  BUS_DATA_RD = ad_porta_data;
+assign  BUS_DATA_RD = 16'h5a5a;
 
 endmodule
